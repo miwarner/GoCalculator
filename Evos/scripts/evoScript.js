@@ -98,6 +98,7 @@ function setupGrind(){
 	var transfer = $('#transfer').is(':checked');	
 	var luckyEgg = $('#luckyEgg').is(':checked');
 	var newPokemon = $('#newPokemon').is(':checked');
+	var pokemonName = $('#candiesNeeded option:selected').text();
 	var candiesHeld = $('#candiesHeld').val();
 	var candiesNeeded = $('#candiesNeeded').val();
 	var startingTotalXP = $('#totalXp').html();
@@ -136,7 +137,7 @@ function setupGrind(){
 	
 
 		 
-    $("#results").append("<tr id='"+resultsAmount+"'><td>" +evolveInfo["totalEvolutions"]+"</td><td class='evoXpResults'>"+evolutionXP+"</td><td>"+evolveInfo["candyRemainder"]+"</td><td class='evoMinResults'>"+evoMinutes+"</td><td>"+XPinfo["newPokeStatus"]+"</td><td>"+XPinfo["eggStatus"]+"</td><td><span onclick='"+onclickClassifier+"'class='glyphicon glyphicon-remove' aria-hidden='true' style='cursor:pointer;color:red'></span></td></tr>");
+    $("#results").append("<tr id='"+resultsAmount+"'><td>" +pokemonName+"</td><td>" +evolveInfo["totalEvolutions"]+"</td><td class='evoXpResults'>"+evolutionXP+"</td><td>"+evolveInfo["candyRemainder"]+"</td><td class='evoMinResults'>"+evoMinutes+"</td><td>"+XPinfo["newPokeStatus"]+"</td><td>"+XPinfo["eggStatus"]+"</td><td><span onclick='"+onclickClassifier+"'class='glyphicon glyphicon-remove' aria-hidden='true' style='cursor:pointer;color:red'></span></td></tr>");
 	
 	$("form#evoPlanner")[0].reset();
 	
