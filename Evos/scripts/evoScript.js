@@ -1,48 +1,90 @@
-function calculateEvolves(candyHold,candyReq,transfer) {
+function calculateEvolves(candyHold, candyReq, transfer, pokemonHeld) {
 
-              //Calculates how many candy will be unused during first round of evolutions
-              var candyRemainder = candyHold % candyReq;
-              
-              //Calculates how many evolutions can be done with initial settings
-              var evolutions = (candyHold-candyRemainder)/candyReq;
+	var evolveInfo = [];
 
-              if (transfer == true){
-                     var transferCandy = evolutions;
-              }
-              else{
-                     transferCandy=0;
-              }
-              
-              //Calculates how many candy will be left over after 1st pass of evolutions, including candy gained
-              var candyPlus = candyRemainder + evolutions + transferCandy;
-              
-              //Tracks total number of evolutions possible
-              var totalEvolutions = evolutions;
-              
-              while(candyPlus != 0 && candyPlus >= candyReq){
-                     candyRemainder = candyPlus % candyReq;
-                     
-                     evolutions = (candyPlus-candyRemainder)/candyReq;
+	// Checks for undefined held pokemon
+	if (isNaN(pokemonHeld)) {
 
-                     if (transfer == true){
-                     var transferCandy = evolutions;
-                     }
-                     else{
-                            transferCandy=0;
-                     }
-                     
-                     candyPlus = candyRemainder + evolutions + transferCandy;
-                     
-                     totalEvolutions = totalEvolutions + evolutions;
-                     
-              }
-			  
-			  var evolveInfo = [];
-			  evolveInfo["totalEvolutions"] = totalEvolutions;
-			  evolveInfo["candyRemainder"] = candyRemainder;
-			  
-			  return evolveInfo;
-   
+		evolveInfo = calculateEvolvesNoLimit(candyHold, candyReq, transfer)
+	} 
+	else {
+
+		evolveInfo = calculateEvolvesWithLimit(candyHold, candyReq, transfer,
+				pokemonHeld)
+	}
+
+	return evolveInfo;
+
+}
+
+function calculateEvolvesNoLimit(candyHold, candyReq, transfer) {
+	// Calculates how many candy will be unused during first round of evolutions
+	var candyRemainder = candyHold % candyReq;
+
+	// Calculates how many evolutions can be done with initial settings
+	var evolutions = (candyHold - candyRemainder) / candyReq;
+
+	if (transfer == true) {
+		var transferCandy = evolutions;
+	} else {
+		transferCandy = 0;
+	}
+
+	// Calculates how many candy will be left over after 1st pass of evolutions,
+	// including candy gained
+	var candyPlus = candyRemainder + evolutions + transferCandy;
+
+	// Tracks total number of evolutions possible
+	var totalEvolutions = evolutions;
+
+	while (candyPlus != 0 && candyPlus >= candyReq) {
+
+		candyRemainder = candyPlus % candyReq;
+
+		evolutions = (candyPlus - candyRemainder) / candyReq;
+
+		if (transfer == true) {
+			var transferCandy = evolutions;
+		} else {
+			transferCandy = 0;
+		}
+
+		candyPlus = candyRemainder + evolutions + transferCandy;
+
+		totalEvolutions = totalEvolutions + evolutions;
+
+	}
+
+	var evolveInfo = [];
+	evolveInfo["totalEvolutions"] = totalEvolutions;
+	evolveInfo["candyRemainder"] = candyRemainder;
+
+	return evolveInfo;
+}
+
+function calculateEvolvesWithLimit(candyHold, candyReq, transfer, pokemonHeld) {
+
+	var totalEvolutions = 0;
+	var evolveInfo = [];
+
+	while (totalEvolutions < pokemonHeld && candyHold >= candyReq) {
+		totalEvolutions++;
+
+		// Calculates new candyHold by reducing candyHold by num candy required
+		// and then adding back candy gained by evolving
+		candyHold = candyHold - candyReq + 1;
+
+		// Takes into account extra candy gained by transfer, if selected on UI
+		if (transfer == true) {
+			candyHold++;
+		}
+
+	}
+
+	evolveInfo["totalEvolutions"] = totalEvolutions;
+	evolveInfo["candyRemainder"] = candyHold;
+
+	return evolveInfo;
 }
 	  
 function calculateXP(totalEvolutions,luckyEgg,newPokemon){
@@ -101,19 +143,20 @@ function setupGrind(){
 	var pokemonName = $('#candiesNeeded option:selected').text();
 	var candiesHeld = $('#candiesHeld').val();
 	var candiesNeeded = $('#candiesNeeded').val();
+	var pokemonHeld = parseInt($('#numPokemonHeld').val());
 	var startingTotalXP = $('#totalXp').html();
 	var startingTotalMinutes = $('#totalMin').html();
 	var resultsAmount = Math.floor(Math.random() * 900) + 10000;
 	resultsAmount=resultsAmount.toString();
 	
 	//run the fun!
-	var evolveInfo = calculateEvolves(candiesHeld,candiesNeeded,transfer);
+	var evolveInfo = calculateEvolves(candiesHeld,candiesNeeded,transfer,pokemonHeld);
 	var XPinfo = calculateXP(evolveInfo["totalEvolutions"],luckyEgg,newPokemon);
 	var evoSeconds = calculateSeconds(evolveInfo["totalEvolutions"],transfer,newPokemon);
 	
 	//Set evolution specific variables
 	var evolutionXP = XPinfo["evolutionXP"];
-	var evoMinutes = parseInt(Math.round(evoSeconds/60));
+	var evoMinutes = parseInt(Math.ceil(evoSeconds/60));
 	
 	//Set-up total calculation
 	var totalXP = evolutionXP;
@@ -159,6 +202,7 @@ function removeRow(row,XP,min){
 function clearTable(){
 	 $("#results").html("");
 	 $('#totalXp').html("0");
+	 $('#totalMin').html("0");
 	
 }
 
